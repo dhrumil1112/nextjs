@@ -5,7 +5,7 @@ import { invoices, customers, revenue, users } from '../lib/placeholder-data';
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
 async function seedUsers() {
-  await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+  // REMOVE THIS LINE: await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
   await sql`
     CREATE TABLE IF NOT EXISTS users (
       id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -30,7 +30,7 @@ async function seedUsers() {
 }
 
 async function seedInvoices() {
-  await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+  // REMOVE THIS LINE: await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
   await sql`
     CREATE TABLE IF NOT EXISTS invoices (
@@ -56,7 +56,7 @@ async function seedInvoices() {
 }
 
 async function seedCustomers() {
-  await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+  // REMOVE THIS LINE: await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
   await sql`
     CREATE TABLE IF NOT EXISTS customers (
@@ -81,6 +81,7 @@ async function seedCustomers() {
 }
 
 async function seedRevenue() {
+  // This function never had the CREATE EXTENSION line, so it's fine.
   await sql`
     CREATE TABLE IF NOT EXISTS revenue (
       month VARCHAR(4) NOT NULL UNIQUE,
@@ -103,6 +104,10 @@ async function seedRevenue() {
 
 export async function GET() {
   try {
+    // You could optionally add a single CREATE EXTENSION call here
+    // if you were starting from a truly fresh DB, but it's not needed
+    // now since the error confirms it already exists.
+
     const result = await sql.begin((sql) => [
       seedUsers(),
       seedCustomers(),
@@ -112,6 +117,7 @@ export async function GET() {
 
     return Response.json({ message: 'Database seeded successfully' });
   } catch (error) {
+    console.error('Database Seeding Error:', error); // Add a console.error for debugging
     return Response.json({ error }, { status: 500 });
   }
 }
